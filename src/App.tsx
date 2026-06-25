@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import Dashboard from '@/pages/Dashboard';
 import Control from '@/pages/Control';
 import History from '@/pages/History';
@@ -13,7 +13,7 @@ function MQTTBridge() {
 
 export default function App() {
   return (
-    <Router basename="/sensor-dashboard">
+    <Router>
       <MQTTBridge />
       <Routes>
         <Route path="/" element={<Dashboard />} />
