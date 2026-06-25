@@ -4,13 +4,17 @@ import Control from '@/pages/Control';
 import History from '@/pages/History';
 import Diagnosis from '@/pages/Diagnosis';
 import About from '@/pages/About';
-// MQTT: 暂不加载，npm mqtt 包在浏览器生产环境有兼容问题
-// 后续接入 STM32 时使用 CDN mqtt.js 替换
-// import { useMQTT } from '@/hooks/useMQTT';
+import { useMQTT } from '@/hooks/useMQTT';
+
+function MQTTBridge() {
+  useMQTT();
+  return null;
+}
 
 export default function App() {
   return (
     <Router>
+      <MQTTBridge />
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/control" element={<Control />} />

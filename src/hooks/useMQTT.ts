@@ -1,10 +1,20 @@
 import { useEffect, useRef } from 'react';
-import mqtt from 'mqtt';
 import type { DeviceCommand, SensorData } from '@/types';
 import { useAppStore } from '@/store/appStore';
 
+/* CDN 加载的 mqtt.js 全局变量 */
+declare const mqtt: {
+  connect: (url: string, opts?: Record<string, unknown>) => {
+    on: (event: string, cb: (...args: any[]) => void) => void;
+    connected: boolean;
+    subscribe: (topic: string) => void;
+    publish: (topic: string, payload: string) => void;
+    end: () => void;
+  };
+};
+
 export function useMQTT() {
-  const clientRef = useRef<mqtt.MqttClient | null>(null);
+  const clientRef = useRef<ReturnType<typeof mqtt.connect> | null>(null);
   const {
     useRealDevice,
     brokerUrl,
@@ -37,10 +47,10 @@ export function useMQTT() {
       client.subscribe(topicData);
     });
 
-    client.on('message', (_topic, payload) => {
+    client.on('message', (_topic: string, payload: Uint8Array) => {
       if (_topic === topicData) {
         try {
-          const data = JSON.parse(payload.toString()) as Partial<SensorData>;
+          const data = JSON.parse(new TextDecoder().decode(payload)) as Partial<SensorData>;
           updateSensor(data);
         } catch (e) {
           console.warn('MQTT payload parse error', e);
@@ -52,7 +62,7 @@ export function useMQTT() {
       setMqttConnected(false);
     });
 
-    client.on('error', (err) => {
+    client.on('error', (err: Error) => {
       console.error('MQTT error', err);
       setMqttConnected(false);
     });
