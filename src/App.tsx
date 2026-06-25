@@ -13,7 +13,7 @@ function MQTTBridge() {
 
 export default function App() {
   return (
-    <Router>
+    <Router basename="/sensor-dashboard">
       <MQTTBridge />
       <Routes>
         <Route path="/" element={<Dashboard />} />
