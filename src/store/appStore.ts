@@ -8,6 +8,7 @@ interface AppState {
   brokerUrl: string;
   topicData: string;
   topicCmd: string;
+  topicStatus: string;
 
   sensor: SensorData;
   devices: DeviceState[];
@@ -20,6 +21,7 @@ interface AppState {
   setUseRealDevice: (v: boolean) => void;
   setMqttConnected: (v: boolean) => void;
   updateSensor: (data: Partial<SensorData>) => void;
+  updateDevicesFromStatus: (status: Partial<Record<string, number | boolean>>) => void;
   toggleDevice: (id: string) => void;
   setDeviceAuto: (id: string, auto: boolean) => void;
   sendCommand: (cmd: DeviceCommand) => void;
@@ -40,6 +42,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   brokerUrl: 'wss://broker.emqx.io:8084/mqtt',
   topicData: 'stm32/sensor/data',
   topicCmd: 'stm32/sensor/cmd',
+  topicStatus: 'stm32/sensor/status',
 
   sensor: makeMockSensor(),
   devices: initialDevices,
@@ -57,23 +60,36 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
+  updateDevicesFromStatus: (status) => {
+    set((state) => ({
+      devices: state.devices.map((d) => {
+        const onVal = status[d.id];
+        const autoVal = status[`${d.id}_auto`];
+        const updates: Partial<DeviceState> = {};
+        if (typeof onVal === 'number') updates.on = onVal !== 0;
+        if (typeof onVal === 'boolean') updates.on = onVal;
+        if (typeof autoVal === 'number') updates.auto = autoVal !== 0;
+        if (typeof autoVal === 'boolean') updates.auto = autoVal;
+        return Object.keys(updates).length > 0 ? { ...d, ...updates } : d;
+      }),
+    }));
+  },
+
   toggleDevice: (id) => {
+    const nextOn = !get().devices.find((d) => d.id === id)?.on;
     set((state) => ({
       devices: state.devices.map((d) =>
-        d.id === id ? { ...d, on: !d.on, auto: false } : d
+        d.id === id ? { ...d, on: nextOn, auto: false } : d
       ),
     }));
-    const dev = get().devices.find((d) => d.id === id);
-    if (dev) {
-      get().sendCommand({ device: id as DeviceCommand['device'], action: dev.on ? 'off' : 'on' });
-    }
+    get().sendCommand({ device: id as DeviceCommand['device'], action: nextOn ? 'on' : 'off' });
   },
 
   setDeviceAuto: (id, auto) => {
     set((state) => ({
       devices: state.devices.map((d) => (d.id === id ? { ...d, auto } : d)),
     }));
-    get().sendCommand({ device: id as DeviceCommand['device'], action: 'auto' });
+    get().sendCommand({ device: id as DeviceCommand['device'], action: 'auto', value: auto ? 1 : 0 });
   },
 
   sendCommand: (cmd) => {

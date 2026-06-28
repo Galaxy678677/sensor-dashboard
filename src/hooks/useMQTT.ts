@@ -20,8 +20,10 @@ export function useMQTT() {
     brokerUrl,
     topicData,
     topicCmd,
+    topicStatus,
     setMqttConnected,
     updateSensor,
+    updateDevicesFromStatus,
   } = useAppStore();
 
   useEffect(() => {
@@ -45,16 +47,19 @@ export function useMQTT() {
     client.on('connect', () => {
       setMqttConnected(true);
       client.subscribe(topicData);
+      client.subscribe(topicStatus);
     });
 
     client.on('message', (_topic: string, payload: Uint8Array) => {
-      if (_topic === topicData) {
-        try {
-          const data = JSON.parse(new TextDecoder().decode(payload)) as Partial<SensorData>;
-          updateSensor(data);
-        } catch (e) {
-          console.warn('MQTT payload parse error', e);
+      try {
+        const data = JSON.parse(new TextDecoder().decode(payload));
+        if (_topic === topicData) {
+          updateSensor(data as Partial<SensorData>);
+        } else if (_topic === topicStatus) {
+          updateDevicesFromStatus(data as Partial<Record<string, number | boolean>>);
         }
+      } catch (e) {
+        console.warn('MQTT payload parse error', e);
       }
     });
 
@@ -80,5 +85,5 @@ export function useMQTT() {
       client.end();
       clientRef.current = null;
     };
-  }, [useRealDevice, brokerUrl, topicData, topicCmd, setMqttConnected, updateSensor]);
+  }, [useRealDevice, brokerUrl, topicData, topicCmd, topicStatus, setMqttConnected, updateSensor, updateDevicesFromStatus]);
 }

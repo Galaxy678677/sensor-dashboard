@@ -43,7 +43,7 @@ export default function About() {
             <li>默认使用模拟数据，无需连接硬件即可体验全部功能。</li>
             <li>点击顶部导航栏的“模拟数据/真实设备”按钮可切换 MQTT 连接。</li>
             <li>连接真实设备前，请确保 ESP8266 已连接 Wi-Fi 并能访问 broker.emqx.io。</li>
-            <li>数据主题：<code className="bg-[#F5F0E8] px-1 rounded">stm32/sensor/data</code>，指令主题：<code className="bg-[#F5F0E8] px-1 rounded">stm32/sensor/cmd</code>。</li>
+            <li>数据主题：<code className="bg-[#F5F0E8] px-1 rounded">stm32/sensor/data</code>，指令主题：<code className="bg-[#F5F0E8] px-1 rounded">stm32/sensor/cmd</code>，状态主题：<code className="bg-[#F5F0E8] px-1 rounded">stm32/sensor/status</code>。</li>
           </ul>
         </div>
 

@@ -11,8 +11,8 @@ export function ToggleSwitch({ checked, onChange, size = 'md', activeColor = '#7
   const isSm = size === 'sm';
   const trackW = isSm ? 40 : 48;
   const trackH = isSm ? 22 : 26;
-  const thumb = isSm ? 18 : 22;
-  const padding = 2;
+  const thumb = isSm ? 16 : 20;
+  const padding = 3;
   const translate = trackW - thumb - padding * 2;
 
   return (
