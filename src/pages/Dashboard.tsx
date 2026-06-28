@@ -26,7 +26,9 @@ export default function Dashboard() {
   }, [useRealDevice, updateSensor]);
 
   const latestDiagnosis = diagnosis[0];
-  const healthyRate = Math.round((diagnosis.filter((d) => d.result === 'healthy').length / diagnosis.length) * 100);
+  const healthyRate = diagnosis.length
+    ? Math.round((diagnosis.filter((d) => d.result === 'healthy').length / diagnosis.length) * 100)
+    : 0;
 
   return (
     <Layout>
@@ -86,12 +88,14 @@ export default function Dashboard() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-green-500 text-white text-xs font-medium">
-                    {latestDiagnosis?.result === 'healthy' ? '健康' : '需关注'}
+                    {diagnosis.length === 0 ? '无数据' : latestDiagnosis?.result === 'healthy' ? '健康' : '需关注'}
                   </span>
-                  <span className="text-xs text-gray-400">刚刚</span>
+                  {diagnosis.length > 0 && <span className="text-xs text-gray-400">刚刚</span>}
                 </div>
                 <p className="text-sm text-gray-600 mt-2">
-                  叶片状态良好，未发现病虫害。置信度 <span className="font-bold text-[#333333]">{healthyRate}%</span>。
+                  {diagnosis.length === 0
+                    ? '暂无 AI 诊断数据，请先连接真实设备或切换模拟数据。'
+                    : `叶片状态良好，未发现病虫害。置信度 ${healthyRate}%。`}
                 </p>
               </div>
             </div>

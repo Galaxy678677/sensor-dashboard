@@ -19,6 +19,15 @@ const colors: Record<EventLog['type'], string> = {
 };
 
 export function EventTimeline({ events }: { events: EventLog[] }) {
+  if (events.length === 0) {
+    return (
+      <div className="text-center text-gray-400 py-8">
+        <AlertTriangle size={28} className="mx-auto mb-2 opacity-50" />
+        <div className="text-sm">暂无事件</div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {events.map((e, idx) => {
