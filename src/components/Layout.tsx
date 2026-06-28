@@ -51,19 +51,36 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-2 text-xs">
-              <span className={cn('w-2 h-2 rounded-full', useRealDevice && mqttConnected ? 'bg-green-500' : 'bg-gray-400')} />
-              <span className="text-gray-500">{useRealDevice && mqttConnected ? '已连接设备' : '模拟数据'}</span>
+              <span
+                className={cn(
+                  'w-2 h-2 rounded-full',
+                  useRealDevice && mqttConnected
+                    ? 'bg-green-500'
+                    : useRealDevice && !mqttConnected
+                      ? 'bg-yellow-400 animate-pulse'
+                      : 'bg-gray-400'
+                )}
+              />
+              <span className="text-gray-500">
+                {useRealDevice && mqttConnected
+                  ? '已连接设备'
+                  : useRealDevice && !mqttConnected
+                    ? '连接中...'
+                    : '模拟数据'}
+              </span>
             </div>
             <button
               onClick={() => setUseRealDevice(!useRealDevice)}
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 useRealDevice
-                  ? 'bg-[#7DB87D] text-white border-[#7DB87D]'
+                  ? mqttConnected
+                    ? 'bg-[#7DB87D] text-white border-[#7DB87D]'
+                    : 'bg-yellow-50 text-yellow-700 border-yellow-300'
                   : 'bg-white text-[#555555] border-gray-300 hover:border-[#7DB87D]'
               )}
             >
-              {useRealDevice ? '真实设备' : '模拟数据'}
+              {useRealDevice ? (mqttConnected ? '真实设备' : '连接中...') : '模拟数据'}
             </button>
           </div>
         </div>
