@@ -5,6 +5,7 @@ import { generateMockHistory, generateMockEvents, generateMockDiagnosis, makeMoc
 interface AppState {
   useRealDevice: boolean;
   mqttConnected: boolean;
+  lastDeviceDataTime: number; /* 最后一次收到 STM32 数据的时间戳(ms) */
   brokerUrl: string;
   topicData: string;
   topicCmd: string;
@@ -49,6 +50,7 @@ const emptySensor = (): SensorData => ({
 export const useAppStore = create<AppState>((set, get) => ({
   useRealDevice: false,
   mqttConnected: false,
+  lastDeviceDataTime: 0,
   brokerUrl: 'wss://broker.emqx.io:8084/mqtt',
   topicData: 'stm32/sensor/data',
   topicCmd: 'stm32/sensor/cmd',
@@ -66,6 +68,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       /* 切换到真实设备：清空假数据，等待 MQTT 真实数据 */
       set({
         useRealDevice: true,
+        mqttConnected: false,
+        lastDeviceDataTime: 0,
         sensor: emptySensor(),
         devices: initialDevices,
         history: [],
@@ -77,6 +81,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       /* 切回模拟数据：重新生成 mock 数据 */
       set({
         useRealDevice: false,
+        mqttConnected: false,
+        lastDeviceDataTime: 0,
         sensor: makeMockSensor(),
         devices: initialDevices,
         history: generateMockHistory(30),
@@ -91,6 +97,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateSensor: (data) => {
     set((state) => ({
       sensor: { ...state.sensor, ...data, timestamp: new Date().toISOString() },
+      lastDeviceDataTime: Date.now(),
     }));
   },
 
@@ -106,6 +113,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (typeof autoVal === 'boolean') updates.auto = autoVal;
         return Object.keys(updates).length > 0 ? { ...d, ...updates } : d;
       }),
+      lastDeviceDataTime: Date.now(),
     }));
   },
 

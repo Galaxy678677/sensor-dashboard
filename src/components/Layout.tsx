@@ -13,7 +13,8 @@ const navItems = [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
-  const { useRealDevice, mqttConnected, setUseRealDevice } = useAppStore();
+  const { useRealDevice, mqttConnected, lastDeviceDataTime, setUseRealDevice } = useAppStore();
+  const deviceConnected = useRealDevice && mqttConnected && Date.now() - lastDeviceDataTime < 10000;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#F5F0E8] text-[#333333] font-sans">
@@ -54,17 +55,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <span
                 className={cn(
                   'w-2 h-2 rounded-full',
-                  useRealDevice && mqttConnected
+                  deviceConnected
                     ? 'bg-green-500'
-                    : useRealDevice && !mqttConnected
+                    : useRealDevice
                       ? 'bg-yellow-400 animate-pulse'
                       : 'bg-gray-400'
                 )}
               />
               <span className="text-gray-500">
-                {useRealDevice && mqttConnected
+                {deviceConnected
                   ? '已连接设备'
-                  : useRealDevice && !mqttConnected
+                  : useRealDevice
                     ? '连接中...'
                     : '模拟数据'}
               </span>
@@ -74,13 +75,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
               className={cn(
                 'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 useRealDevice
-                  ? mqttConnected
+                  ? deviceConnected
                     ? 'bg-[#7DB87D] text-white border-[#7DB87D]'
                     : 'bg-yellow-50 text-yellow-700 border-yellow-300'
                   : 'bg-white text-[#555555] border-gray-300 hover:border-[#7DB87D]'
               )}
             >
-              {useRealDevice ? (mqttConnected ? '真实设备' : '连接中...') : '模拟数据'}
+              {useRealDevice ? (deviceConnected ? '真实设备' : '连接中...') : '模拟数据'}
             </button>
           </div>
         </div>
