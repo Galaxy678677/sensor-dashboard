@@ -36,6 +36,16 @@ const initialDevices: DeviceState[] = [
   { id: 'led', name: '补光灯', on: false, auto: true, icon: 'Lightbulb', description: '自动补光' },
 ];
 
+const emptySensor = (): SensorData => ({
+  lux_a: 0,
+  lux_b: 0,
+  temp: 0,
+  humi: 0,
+  soil_moisture: 0,
+  soil_temp: 0,
+  timestamp: new Date().toISOString(),
+});
+
 export const useAppStore = create<AppState>((set, get) => ({
   useRealDevice: false,
   mqttConnected: false,
@@ -51,7 +61,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   diagnosis: generateMockDiagnosis(6),
   lastWater: { time: '今天 10:30', amount: '约 80ml' },
 
-  setUseRealDevice: (v) => set({ useRealDevice: v }),
+  setUseRealDevice: (v) => {
+    if (v) {
+      /* 切换到真实设备：清空假数据，等待 MQTT 真实数据 */
+      set({
+        useRealDevice: true,
+        sensor: emptySensor(),
+        devices: initialDevices,
+        history: [],
+        events: [],
+        diagnosis: [],
+        lastWater: { time: '-', amount: '-' },
+      });
+    } else {
+      /* 切回模拟数据：重新生成 mock 数据 */
+      set({
+        useRealDevice: false,
+        sensor: makeMockSensor(),
+        devices: initialDevices,
+        history: generateMockHistory(30),
+        events: generateMockEvents(8),
+        diagnosis: generateMockDiagnosis(6),
+        lastWater: { time: '今天 10:30', amount: '约 80ml' },
+      });
+    }
+  },
   setMqttConnected: (v) => set({ mqttConnected: v }),
 
   updateSensor: (data) => {
